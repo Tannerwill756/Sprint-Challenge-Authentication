@@ -25,8 +25,37 @@ router.post("/register", (req, res) => {
 });
 
 router.post("/login", (req, res) => {
-  // implement login
+  const { username, password } = req.body;
+
+  if (isValid(req.body)) {
+    Users.findBy({ username }).then(([user]) => {
+      if (user && bcryptjs.compareSync(password, user.password)) {
+        req.session.loggedIn = true;
+        req.session.user = user;
+
+        res.status(200).json({ message: "Welcome to our API" });
+      } else {
+        res.status(401).json({ message: "Invalid Credentials" });
+      }
+    });
+  } else {
+    res.status(400).json({
+      message: "Please provide username and password that is a string",
+    });
+  }
 });
+
+function generateToken(user) {
+  const payload = {
+    subject: user.id,
+    username: user.username,
+  };
+  const secret = process.env.JWT_secret || "supersecret";
+  const options = {
+    expiresIn: "1d",
+  };
+  return jwt.sign(payload, secret, options);
+}
 
 function isValid(user) {
   return Boolean(user.username && user.password);
