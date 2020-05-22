@@ -21,3 +21,11 @@ test("GET /api/jokes to get all jokes, auth required", async () => {
   expect(res.body[0]).toHaveProperty("id");
   expect(res.body[0]).toHaveProperty("joke");
 });
+
+test("GET /api/jokes failure", async () => {
+  const res = await request(server).get("/api/jokes");
+
+  expect(res.body).toMatchObject({
+    message: "please provide the authentication information",
+  });
+});
